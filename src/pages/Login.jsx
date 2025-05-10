@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 
-function Login() {
+function Login({ onLogin }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -12,11 +12,15 @@ function Login() {
     e.preventDefault();
     try {
       const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
-     localStorage.setItem("token", res.data.token);
-localStorage.setItem("user", JSON.stringify({ role: res.data.role }));
+
+      localStorage.setItem("token", res.data.token);
+      localStorage.setItem("user", JSON.stringify({ role: res.data.role, name: res.data.name }));
+
+      if (onLogin) onLogin();
 
       const { role } = JSON.parse(atob(res.data.token.split('.')[1]));
-      navigate(role === "admin" ? "/dashboard" : "/orphans");
+      navigate(role === "admin" ? "/dashboard" : "/user-home");
+
     } catch (err) {
       setError("Invalid credentials");
     }
@@ -47,9 +51,11 @@ localStorage.setItem("user", JSON.stringify({ role: res.data.role }));
           Login
         </button>
         <p className="text-sm mt-4 text-center">
-  Don't have an account? <a href="/register" className="text-purple-400 hover:underline">Register</a>
-</p>
-
+          Don't have an account?{" "}
+          <a href="/register" className="text-purple-400 hover:underline">
+            Register
+          </a>
+        </p>
       </form>
     </div>
   );

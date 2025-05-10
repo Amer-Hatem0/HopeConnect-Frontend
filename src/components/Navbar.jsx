@@ -11,18 +11,18 @@ function Navbar({ onLogout }) {
   }
 
   const role = user?.role;
-  const name = user?.name || "User";
+  const name = user?.name  ;
 
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("user");
-    if (onLogout) onLogout();  // ✅ تأكد من وجود الدالة قبل الاستدعاء
+    if (onLogout) onLogout();  // 
     navigate("/");
   };
 
   return (
     <nav className="bg-gray-900 text-white p-4 flex justify-between items-center shadow-md">
-      <div className="text-lg font-bold">Welcome, {name}</div>
+      <div className="text-lg font-bold">Welcome, {role}</div>
 
       <div className="flex gap-4 items-center">
         {role === "admin" && (
@@ -34,6 +34,10 @@ function Navbar({ onLogout }) {
             <button onClick={() => navigate("/campaigns")}>Campaigns</button>
             <button onClick={() => navigate("/donations")}>Donations</button>
             <button onClick={() => navigate("/service-requests")}>Requests</button>
+            <button onClick={() => navigate("/impact-reports")}>Impact</button>
+            <button onClick={() => navigate("/ReviewForm")}>ReviewForm</button>
+            <button onClick={() => navigate("/Reviews")}>Reviews</button>
+
           </>
         )}
         <button

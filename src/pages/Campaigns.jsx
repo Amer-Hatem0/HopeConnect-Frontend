@@ -15,6 +15,9 @@ function Campaigns() {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
+  const user = JSON.parse(localStorage.getItem("user"));
+  const role = user?.role;
+
   const fetchCampaigns = () => {
     axios.get("http://localhost:5000/api/campaigns")
       .then((res) => setCampaigns(res.data))
@@ -44,7 +47,14 @@ function Campaigns() {
 
     request.then(() => {
       setShowModal(false);
-      setFormData({ id: null, name: "", description: "", goal_amount: "", collected_amount: "", status: "" });
+      setFormData({
+        id: null,
+        name: "",
+        description: "",
+        goal_amount: "",
+        collected_amount: "",
+        status: ""
+      });
       setIsEditing(false);
       fetchCampaigns();
     });
@@ -58,16 +68,25 @@ function Campaigns() {
     <div className="p-6 text-white">
       <div className="flex justify-between items-center mb-4">
         <h1 className="text-2xl font-bold">Campaigns</h1>
-        <button
-          onClick={() => {
-            setFormData({ id: null, name: "", description: "", goal_amount: "", collected_amount: "", status: "" });
-            setIsEditing(false);
-            setShowModal(true);
-          }}
-          className="bg-purple-600 px-4 py-2 rounded hover:bg-purple-700"
-        >
-          + Add Campaign
-        </button>
+        {role === "admin" && (
+          <button
+            onClick={() => {
+              setFormData({
+                id: null,
+                name: "",
+                description: "",
+                goal_amount: "",
+                collected_amount: "",
+                status: ""
+              });
+              setIsEditing(false);
+              setShowModal(true);
+            }}
+            className="bg-purple-600 px-4 py-2 rounded hover:bg-purple-700"
+          >
+            + Add Campaign
+          </button>
+        )}
       </div>
 
       <input
@@ -84,7 +103,7 @@ function Campaigns() {
             <th className="border px-4 py-2">Goal</th>
             <th className="border px-4 py-2">Collected</th>
             <th className="border px-4 py-2">Status</th>
-            <th className="border px-4 py-2">Actions</th>
+            {role === "admin" && <th className="border px-4 py-2">Actions</th>}
           </tr>
         </thead>
         <tbody>
@@ -94,16 +113,18 @@ function Campaigns() {
               <td className="border text-black px-4 py-2">${c.goal_amount}</td>
               <td className="border text-black px-4 py-2">${c.collected_amount}</td>
               <td className="border text-black px-4 py-2">{c.status}</td>
-              <td className="border text-black px-4 py-2 space-x-2">
-                <button onClick={() => handleEdit(c)} className="text-yellow-400 hover:text-yellow-600">Edit</button>
-                <button onClick={() => handleDelete(c.id)} className="text-red-400 hover:text-red-600">Delete</button>
-              </td>
+              {role === "admin" && (
+                <td className="border text-black px-4 py-2 space-x-2">
+                  <button onClick={() => handleEdit(c)} className="text-yellow-400 hover:text-yellow-600">Edit</button>
+                  <button onClick={() => handleDelete(c.id)} className="text-red-400 hover:text-red-600">Delete</button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
       </table>
 
-      {showModal && (
+      {role === "admin" && showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-gray-800 p-6 rounded w-96">
             <h2 className="text-lg font-bold mb-4">{isEditing ? "Edit Campaign" : "Add New Campaign"}</h2>
