@@ -15,6 +15,10 @@ function Campaigns() {
   const [showModal, setShowModal] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
 
+  const [donationModal, setDonationModal] = useState(false);
+  const [selectedCampaign, setSelectedCampaign] = useState(null);
+  const [donationAmount, setDonationAmount] = useState("");
+
   const user = JSON.parse(localStorage.getItem("user"));
   const role = user?.role;
 
@@ -58,6 +62,25 @@ function Campaigns() {
       setIsEditing(false);
       fetchCampaigns();
     });
+  };
+
+  const handleDonate = (campaign) => {
+    setSelectedCampaign(campaign);
+    setDonationModal(true);
+    setDonationAmount("");
+  };
+
+  const submitDonation = async () => {
+    try {
+      await axios.put(`http://localhost:5000/api/campaigns/${selectedCampaign.id}/donate`, {
+        amount: Number(donationAmount),
+      });
+      fetchCampaigns();
+      setDonationModal(false);
+    } catch (err) {
+      alert("Failed to donate");
+      console.error(err);
+    }
   };
 
   const filtered = campaigns.filter((c) =>
@@ -104,6 +127,7 @@ function Campaigns() {
             <th className="border px-4 py-2">Collected</th>
             <th className="border px-4 py-2">Status</th>
             {role === "admin" && <th className="border px-4 py-2">Actions</th>}
+            {role === "donor" && <th className="border px-4 py-2">Donate</th>}
           </tr>
         </thead>
         <tbody>
@@ -119,11 +143,22 @@ function Campaigns() {
                   <button onClick={() => handleDelete(c.id)} className="text-red-400 hover:text-red-600">Delete</button>
                 </td>
               )}
+              {role === "donor" && (
+                <td className="border px-4 py-2 text-center">
+                  <button
+                    onClick={() => handleDonate(c)}
+                    className="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700"
+                  >
+                    Donate
+                  </button>
+                </td>
+              )}
             </tr>
           ))}
         </tbody>
       </table>
 
+      {/* Modal for Add/Edit Campaign */}
       {role === "admin" && showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
           <div className="bg-gray-800 p-6 rounded w-96">
@@ -132,7 +167,7 @@ function Campaigns() {
               <input type="text" placeholder="Name" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} className="p-2 rounded text-black" required />
               <input type="text" placeholder="Description" value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} className="p-2 rounded text-black" required />
               <input type="number" placeholder="Goal Amount" value={formData.goal_amount} onChange={(e) => setFormData({ ...formData, goal_amount: e.target.value })} className="p-2 rounded text-black" required />
-              <input type="number" placeholder="Collected Amount" value={formData.collected_amount} onChange={(e) => setFormData({ ...formData, collected_amount: e.target.value })} className="p-2 rounded text-black" required />
+              <input type="number" placeholder="Collected Amount" value={formData.collected_amount} onChange={(e) => setFormData({ ...formData, collected_amount: e.target.value })} className="p-2 rounded text-black" />
               <input type="text" placeholder="Status" value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })} className="p-2 rounded text-black" required />
               <div className="flex justify-end gap-2">
                 <button type="button" onClick={() => setShowModal(false)} className="text-gray-300">Cancel</button>
@@ -141,6 +176,35 @@ function Campaigns() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Modal for Donation */}
+      {donationModal && selectedCampaign && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50">
+          <div className="bg-gray-800 p-6 rounded w-96">
+            <h2 className="text-lg font-bold mb-4 text-purple-300">
+              Donate to {selectedCampaign.name}
+            </h2>
+            <input
+              type="number"
+              placeholder="Amount"
+              value={donationAmount}
+              onChange={(e) => setDonationAmount(e.target.value)}
+              className="w-full p-2 mb-4 rounded text-black"
+              min="1"
+              required
+            />
+            <div className="flex justify-end gap-2">
+              <button onClick={() => setDonationModal(false)} className="text-gray-300">Cancel</button>
+              <button
+                onClick={submitDonation}
+                className="bg-purple-600 px-4 py-2 rounded hover:bg-purple-700"
+              >
+                Donate
+              </button>
+            </div>
           </div>
         </div>
       )}

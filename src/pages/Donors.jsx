@@ -18,10 +18,18 @@ function Donors() {
     fetchDonors();
   }, []);
 
-  const handleDelete = (id) => {
-    axios.delete(`http://localhost:5000/api/donors/${id}`)
-      .then(() => fetchDonors());
-  };
+const handleDelete = (id) => {
+  axios.delete(`http://localhost:5000/api/donors/${id}`)
+    .then(() => {
+      fetchDonors();
+      alert("Donor deleted successfully.");
+    })
+    .catch((err) => {
+      const errorMessage = err.response?.data?.message || "Delete failed.";
+      alert(`❌ Cannot delete donor: ${errorMessage}`);
+    });
+};
+
 
   const handleEdit = (donor) => {
     setFormData(donor);
@@ -32,7 +40,7 @@ function Donors() {
   const handleSubmit = (e) => {
     e.preventDefault();
     const request = isEditing
-      ? axios.put(`http://localhost:5000/api/donors/${formData.id}`, formData)
+      ? axios.patch(`http://localhost:5000/api/donors/${formData.id}`, formData)
       : axios.post("http://localhost:5000/api/donors", formData);
 
     request.then(() => {

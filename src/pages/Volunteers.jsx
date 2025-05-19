@@ -18,10 +18,15 @@ function Volunteers() {
     fetchVolunteers();
   }, []);
 
-  const handleDelete = (id) => {
-    axios.delete(`http://localhost:5000/api/volunteers/${id}`)
-      .then(() => fetchVolunteers());
-  };
+const handleDelete = (id) => {
+  axios.delete(`http://localhost:5000/api/volunteers/${id}`)
+    .then(() => fetchVolunteers())
+    .catch((err) => {
+      const msg = err.response?.data?.message || "Delete failed.";
+      alert(msg); 
+    });
+};
+
 
   const handleEdit = (volunteer) => {
     setFormData(volunteer);
